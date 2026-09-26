@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#07101c">
+<title>NHL Fantasy Pool — Cormber Canadiens</title>
+<style>
+:root{--bg:#07101c;--card:#101b2a;--card2:#142236;--line:#2a3a51;--text:#f5f7fb;--muted:#9aa9bc;--red:#e52b32;--gold:#f4c95d;--green:#45d18a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.app{max-width:1100px;margin:auto;padding-bottom:82px}header{position:sticky;top:0;z-index:10;background:#07101cf2;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+.top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px}.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:20px}.cc{width:42px;height:42px;border-radius:12px;background:var(--red);display:grid;place-items:center;font-weight:900}.brand span{color:#ff4d52}.season{color:var(--muted);font-size:12px;letter-spacing:1px}
+.tabs{display:flex;gap:8px;overflow:auto;padding:0 12px 10px}.tab{white-space:nowrap;background:var(--card);border:1px solid var(--line);color:var(--muted);border-radius:22px;padding:9px 14px;font-weight:800}.tab.active{color:#fff;background:#35151b;border-color:#a62b34}
+main{padding:18px 12px}.page{display:none}.page.active{display:block}h1{font-size:30px;margin:0 0 3px;text-transform:uppercase}h2{font-size:19px;margin:0 0 12px}.sub{color:var(--muted);margin-bottom:14px}
+.card{background:linear-gradient(145deg,var(--card),#0c1624);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:14px}.table{border-collapse:collapse;width:100%;min-width:720px}.table th,.table td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;font-size:12px}.table th{background:var(--card2);color:#aeb9c8;text-transform:uppercase;font-size:10px;letter-spacing:.7px;position:sticky;top:0}.team{display:flex;align-items:center;gap:9px;min-width:180px}.logo{width:30px;height:30px;object-fit:contain;border-radius:7px;background:#fff}.rank{font-weight:900}.you{background:#25151a}.pill{display:inline-block;border:1px solid var(--line);border-radius:7px;padding:3px 6px;font-size:10px;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}.kpi b{font-size:23px}.label{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.notice{padding:11px 12px;border:1px solid #8b6a1e;background:#2b2412;color:#f6db8a;border-radius:12px;font-size:12px;margin-bottom:12px}
+.search{width:100%;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:11px;color:#fff;margin-bottom:12px}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#0d1724f5;border-top:1px solid var(--line);z-index:20}.bottomin{max-width:1100px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}.b{border:0;background:none;color:#8492a5;padding:8px 2px;font-size:10px;font-weight:800}.b.active{color:#ff4d52}.ico{display:block;font-size:18px;margin-bottom:2px}
+@media(min-width:800px){main{padding:24px}.bottom{display:none}.tabs{justify-content:center}}@media(max-width:650px){.kpis{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="top"><div class="brand"><div class="cc">CC</div><div>NHL FANTASY <span>POOL</span></div></div><div class="season">2026–27</div></div>
+<nav class="tabs" id="tabs"></nav></header>
+<main>
+<section id="standings" class="page"></section><section id="team" class="page"></section><section id="players" class="page"></section>
+<section id="schedule" class="page"></section><section id="league" class="page"></section><section id="transactions" class="page"></section><section id="rules" class="page"></section>
+</main></div>
+<nav class="bottom"><div class="bottomin" id="bottom"></div></nav>
+<script>
+const teams=[
+["Canadiens","Eastern","Atlantic","https://a.espncdn.com/i/teamlogos/nhl/500/mtl.png"],
+["Bruins","Eastern","Atlantic","https://a.espncdn.com/i/teamlogos/nhl/500/bos.png"],
+["Sabres","Eastern","Atlantic","https://a.espncdn.com/i/teamlogos/nhl/500/buf.png"],
+["Red Wings","Eastern","Atlantic","https://a.espncdn.com/i/teamlogos/nhl/500/det.png"],
+["Panthers","Eastern","Atlantic","https://a.espncdn.com/i/teamlogos/nhl/500/fla.png"],
+["Senators","Eastern","Atlantic","https://a.espncdn.com/i/teamlogos/nhl/500/ott.png"],
+["Lightning","Eastern","Atlantic","https://a.espncdn.com/i/teamlogos/nhl/500/tb.png"],
+["Maple Leafs","Eastern","Atlantic","https://a.espncdn.com/i/teamlogos/nhl/500/tor.png"],
+["Nordiques","Eastern","Atlantic","https://upload.wikimedia.org/wikipedia/en/3/3c/Quebec_Nordiques_logo.svg"],
+["Hurricanes","Eastern","Metropolitan","https://a.espncdn.com/i/teamlogos/nhl/500/car.png"],
+["Blue Jackets","Eastern","Metropolitan","https://a.espncdn.com/i/teamlogos/nhl/500/cbj.png"],
+["Devils","Eastern","Metropolitan","https://a.espncdn.com/i/teamlogos/nhl/500/nj.png"],
+["Islanders","Eastern","Metropolitan","https://a.espncdn.com/i/teamlogos/nhl/500/nyi.png"],
+["Rangers","Eastern","Metropolitan","https://a.espncdn.com/i/teamlogos/nhl/500/nyr.png"],
+["Flyers","Eastern","Metropolitan","https://a.espncdn.com/i/teamlogos/nhl/500/phi.png"],
+["Penguins","Eastern","Metropolitan","https://a.espncdn.com/i/teamlogos/nhl/500/pit.png"],
+["Capitals","Eastern","Metropolitan","https://a.espncdn.com/i/teamlogos/nhl/500/wsh.png"],
+["Whalers","Eastern","Metropolitan","https://upload.wikimedia.org/wikipedia/en/9/9f/Hartford_Whalers.svg"],
+["Blackhawks","Western","Central","https://a.espncdn.com/i/teamlogos/nhl/500/chi.png"],
+["Avalanche","Western","Central","https://a.espncdn.com/i/teamlogos/nhl/500/col.png"],
+["Stars","Western","Central","https://a.espncdn.com/i/teamlogos/nhl/500/dal.png"],
+["Wild","Western","Central","https://a.espncdn.com/i/teamlogos/nhl/500/min.png"],
+["Predators","Western","Central","https://a.espncdn.com/i/teamlogos/nhl/500/nsh.png"],
+["Blues","Western","Central","https://a.espncdn.com/i/teamlogos/nhl/500/stl.png"],
+["Jets","Western","Central","https://a.espncdn.com/i/teamlogos/nhl/500/wpg.png"],
+["Mammoth","Western","Central","https://a.espncdn.com/i/teamlogos/nhl/500/uta.png"],
+["North Stars","Western","Central","https://upload.wikimedia.org/wikipedia/en/9/9e/Minnesota_North_Stars_logo.svg"],
+["Ducks","Western","Pacific","https://a.espncdn.com/i/teamlogos/nhl/500/ana.png"],
+["Flames","Western","Pacific","https://a.espncdn.com/i/teamlogos/nhl/500/cgy.png"],
+["Oilers","Western","Pacific","https://a.espncdn.com/i/teamlogos/nhl/500/edm.png"],
+["Kings","Western","Pacific","https://a.espncdn.com/i/teamlogos/nhl/500/la.png"],
+["Sharks","Western","Pacific","https://a.espncdn.com/i/teamlogos/nhl/500/sj.png"],
+["Kraken","Western","Pacific","https://a.espncdn.com/i/teamlogos/nhl/500/sea.png"],
+["Canucks","Western","Pacific","https://a.espncdn.com/i/teamlogos/nhl/500/van.png"],
+["Golden Knights","Western","Pacific","https://a.espncdn.com/i/teamlogos/nhl/500/vgk.png"],
+["Golden Seals","Western","Pacific","https://upload.wikimedia.org/wikipedia/en/7/75/California_Golden_Seals_logo.svg"]
+];
+const nav=[["standings","Standings","🏆"],["team","My Team","🛡"],["players","Players","♙"],["schedule","Schedule","▣"],["league","League","☷"],["transactions","Moves","↔"],["rules","Rules","📖"]];
+function go(id){location.hash=id;render(id)}
+function render(id){if(!nav.some(x=>x[0]===id))id="standings";document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===id));document.querySelectorAll(".tab,.b").forEach(x=>x.classList.toggle("active",x.dataset.page===id));document.getElementById(id).innerHTML=views[id]();if(id==="schedule")document.getElementById("weeklyGames").innerHTML=weeklyGamesHtml()}
+document.getElementById("tabs").innerHTML=nav.map(x=>`<button class="tab" data-page="${x[0]}" onclick="go('${x[0]}')">${x[1]}</button>`).join("");
+document.getElementById("bottom").innerHTML=nav.slice(0,5).map(x=>`<button class="b" data-page="${x[0]}" onclick="go('${x[0]}')"><span class="ico">${x[2]}</span>${x[1]}</button>`).join("");
+
+const weeklyOpponents=[
+["Week 1","Sep 29 – Oct 5",["Bruins","Sabres","Red Wings"]],
+["Week 2","Oct 6 – Oct 12",["Panthers","Senators","Lightning"]],
+["Week 3","Oct 13 – Oct 19",["Maple Leafs","Nordiques","Hurricanes"]],
+["Week 4","Oct 20 – Oct 26",["Blue Jackets","Devils","Islanders"]],
+["Week 5","Oct 27 – Nov 2",["Rangers","Flyers","Penguins"]],
+["Week 6","Nov 3 – Nov 9",["Capitals","Whalers","Bruins"]],
+["Week 7","Nov 10 – Nov 16",["Sabres","Red Wings","Panthers","Senators"]],
+["Week 8","Nov 17 – Nov 23",["Lightning","Maple Leafs","Nordiques"]],
+["Week 9","Nov 24 – Nov 30",["Hurricanes","Blue Jackets","Devils"]],
+["Week 10","Dec 1 – Dec 7",["Islanders","Rangers","Flyers"]],
+["Week 11","Dec 8 – Dec 14",["Penguins","Capitals","Whalers"]],
+["Week 12","Dec 15 – Dec 21",["Bruins","Sabres","Red Wings","Panthers"]],
+["Week 13","Dec 22 – Dec 28",["Senators","Lightning","Maple Leafs"]],
+["Week 14","Dec 29 – Jan 4",["Nordiques","Hurricanes","Blue Jackets"]],
+["Week 15","Jan 5 – Jan 11",["Devils","Islanders","Rangers"]],
+["Week 16","Jan 12 – Jan 18",["Flyers","Penguins","Capitals","Whalers"]],
+["Week 17","Jan 19 – Jan 25",["Bruins","Sabres","Red Wings"]],
+["Week 18","Jan 26 – Feb 1",["Panthers","Senators","Lightning"]],
+["Week 19","Feb 2 – Feb 8",["Maple Leafs","Nordiques","Hurricanes"]],
+["Week 20","Feb 9 – Feb 15",["Blue Jackets","Devils","Islanders"]],
+["Week 21","Feb 16 – Feb 22",["Rangers","Flyers","Penguins","Capitals"]],
+["Week 22","Feb 23 – Mar 1",["Whalers","Bruins","Sabres"]],
+["Week 23","Mar 2 – Mar 8",["Red Wings","Panthers","Senators"]],
+["Week 24","Mar 9 – Mar 15",["Lightning","Maple Leafs","Nordiques"]],
+["Week 25","Mar 16 – Mar 22",["Hurricanes","Blue Jackets","Devils"]],
+["Week 26","Mar 23 – Mar 29",["Islanders","Rangers","Flyers","Penguins"]]
+];
+function weeklyGamesHtml(){
+ return weeklyOpponents.map((w,i)=>`<div class="row"><div><b>${w[0]}</b><div class="sub" style="margin:3px 0 0">${w[1]}</div></div><div style="text-align:right">${w[2].map((o,j)=>`<div><b>${o}</b> <span class="pill">${j===0&&i===0?"CURRENT":"UPCOMING"}</span></div>`).join("")}</div></div>`).join("");
+}
+const views={
+standings:()=>`<h1>Standings</h1><div class="sub">36 fantasy teams • 84 games • Win 2 pts • Tie 1 pt • Loss 0</div>
+<div class="card"><div class="kpis"><div class="kpi"><span class="label">Teams</span><b>36</b></div><div class="kpi"><span class="label">Conferences</span><b>2</b></div><div class="kpi"><span class="label">Divisions</span><b>4</b></div><div class="kpi"><span class="label">Games</span><b>84</b></div></div></div>
+<div class="tablewrap"><table class="table"><thead><tr><th>Rank</th><th>Team</th><th>GP</th><th>W</th><th>T</th><th>L</th><th>PTS</th><th>Last 20</th></tr></thead><tbody>${teams.map((t,i)=>`<tr class="${i===0?"you":""}"><td class="rank">${i+1}</td><td><div class="team"><img class="logo" src="${t[3]}" onerror="this.style.visibility='hidden'"><b>${i===0?"Cormber Canadiens":t[0]}</b></div></td><td>0</td><td>0</td><td>0</td><td>0</td><td><b>0</b></td><td><span class="pill">—</span></td></tr>`).join("")}</tbody></table></div>`,
+team:()=>`<h1>My Team</h1><div class="sub">Cormber Canadiens • Montreal Canadiens identity</div><div class="card"><div class="kpis"><div class="kpi"><span class="label">Active</span><b>20/20</b></div><div class="kpi"><span class="label">Goalies</span><b>2</b></div><div class="kpi"><span class="label">Defense</span><b>6</b></div><div class="kpi"><span class="label">Forwards</span><b>12</b></div></div></div><div class="notice"><b>Salary cap:</b> $100,000,000. Reserve players do not count against the cap. Weekly moves take effect Tuesday at 4:00 AM.</div><div class="card"><h2>Roster</h2><div class="row"><span>Forwards</span><b>12 active</b></div><div class="row"><span>Defencemen</span><b>6 active</b></div><div class="row"><span>Goaltenders</span><b>2 active</b></div><div class="row"><span>Reserve</span><b>0 / 3</b></div></div>`,
+players:()=>`<h1>Players</h1><div class="sub">Player selection is sorted by total points when the verified 2025–26 player database is loaded.</div><input class="search" placeholder="Search player, NHL team or position…"><div class="notice"><b>Database status:</b> The player database still needs the verified 2025–26 NHL regular-season import. No player should be treated as final until that import is loaded.</div><div class="card"><h2>Player list</h2><div class="row"><span>Skaters</span><span class="pill">Goals + Assists = Points</span></div><div class="row"><span>Goalies</span><span class="pill">Goalie scoring rules</span></div></div>`,
+schedule:()=>`<h1>Schedule</h1><div class="sub">Cormber Canadiens • 84 fantasy games • weekly head-to-head schedule</div>
+<div class="kpis"><div class="kpi"><span class="label">Division</span><b>38</b></div><div class="kpi"><span class="label">Same Conf.</span><b>28</b></div><div class="kpi"><span class="label">Other Conf.</span><b>18</b></div><div class="kpi"><span class="label">Total</span><b>84</b></div></div>
+<div class="notice" style="margin-top:12px"><b>Weekly timing:</b> Each fantasy week closes Tuesday at 4:00 AM. The completed week's games then update your W/T/L, standings points and GP before the new week begins.</div>
+<div class="card"><h2>2026–27 Weekly Games</h2><div id="weeklyGames"></div></div>`,
+league:()=>`<h1>League</h1><div class="sub">18 Eastern • 18 Western • 9 teams per division</div>${["Eastern — Atlantic","Eastern — Metropolitan","Western — Central","Western — Pacific"].map((d,di)=>`<div class="card"><h2>${d}</h2>${teams.slice(di*9,di*9+9).map((t,i)=>`<div class="row"><span><b>${di*9+i+1}.</b> ${di===0&&i===0?"Cormber Canadiens":t[0]}</span><span class="pill">${t[2]}</span></div>`).join("")}</div>`).join("")}`,
+transactions:()=>`<h1>Transactions</h1><div class="sub">Requests remain pending until Tuesday at 4:00 AM.</div><div class="notice">At Tuesday 4:00 AM: close the fantasy week → finalize results → process approved trades/reserve moves → update rosters → start the new week.</div><div class="card"><div class="row"><span>Add / Drop</span><b>Pending until Tuesday</b></div><div class="row"><span>Trades</span><b>Pending until Tuesday</b></div><div class="row"><span>Reserve moves</span><b>Pending until Tuesday</b></div></div>`,
+rules:()=>`<h1>Rules</h1><div class="sub">Locked pool rules</div><div class="card"><h2>League</h2><div class="row"><span>Teams</span><b>36</b></div><div class="row"><span>Roster</span><b>2 G / 6 D / 12 F</b></div><div class="row"><span>Reserve</span><b>Max 3</b></div><div class="row"><span>Salary cap</span><b>$100M</b></div><div class="row"><span>Schedule</span><b>38 / 28 / 18 = 84</b></div><div class="row"><span>Fantasy week</span><b>Tuesday 4:00 AM</b></div></div><div class="card"><h2>Scoring</h2><div class="row"><span>Skater goal</span><b>1</b></div><div class="row"><span>Skater assist</span><b>1</b></div><div class="row"><span>Goalie win</span><b>2</b></div><div class="row"><span>Goalie OT/SO loss</span><b>1</b></div><div class="row"><span>Regulation goalie loss</span><b>0</b></div><div class="row"><span>60-minute tie</span><b>1</b></div></div>`
+};
+window.onhashchange=()=>render(location.hash.slice(1));render(location.hash.slice(1)||"standings");
+</script>
+</body></html>
