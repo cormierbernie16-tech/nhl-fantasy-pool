@@ -227,16 +227,22 @@ using (public.is_commissioner()) with check (public.is_commissioner());
 
 create policy "rosters readable by authenticated users"
 on public.roster_entries for select to authenticated using (true);
-create policy "managers and commissioner manage roster entries"
+-- Roster changes must be applied by the trusted transaction processor, not directly
+-- by a manager's browser. The commissioner can correct roster data administratively.
+create policy "commissioner manages roster entries"
 on public.roster_entries for all to authenticated
-using (public.owns_team(fantasy_team_id) or public.is_commissioner())
-with check (public.owns_team(fantasy_team_id) or public.is_commissioner());
+using (public.is_commissioner())
+with check (public.is_commissioner());
 
 create policy "transactions readable by authenticated users"
 on public.league_transactions for select to authenticated using (true);
 create policy "managers submit own transactions"
 on public.league_transactions for insert to authenticated
-with check (public.owns_team(fantasy_team_id) and submitted_by = (select auth.uid()));
+with check (
+  public.owns_team(fantasy_team_id)
+  and submitted_by = (select auth.uid())
+  and status = 'pending'
+);
 create policy "commissioner manages transactions"
 on public.league_transactions for all to authenticated
 using (public.is_commissioner()) with check (public.is_commissioner());
